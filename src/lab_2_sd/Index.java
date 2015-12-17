@@ -10,5 +10,9 @@ package lab_2_sd;
  * @author Nelson
  */
 class Index {
+
+    String getEntryFromIndex(String id) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

@@ -39,20 +39,22 @@ public class IndexStart {
         int nParticiones = 0;
         
         while( (parametro = bf.readLine() ) != null ){
-            switch (counter) {
-                case 0:
-                    miPuerto = Integer.parseInt(parametro);
-                    System.out.println("parametro " + counter + ": " + miPuerto);
-                    break;
-                case 1:
-                    nParticiones = Integer.parseInt(parametro);
-                    System.out.println("parametro " + counter + ": " + nParticiones);
-                    break;
-                default:
-                    System.out.println("parametro " + counter + ": " + parametro);
-                    break;
+            if(parametro.charAt(0) != '/'){
+                switch (counter) {
+                    case 0:
+                        miPuerto = Integer.parseInt(parametro);
+                        System.out.println("parametro " + counter + ": " + miPuerto);
+                        break;
+                    case 1:
+                        nParticiones = Integer.parseInt(parametro);
+                        System.out.println("parametro " + counter + ": " + nParticiones);
+                        break;
+                    default:
+                        System.out.println("parametro " + counter + ": " + parametro);
+                        break;
+                }
+                counter++;            
             }
-            counter++;            
         }
         
         // ************************************************ \\

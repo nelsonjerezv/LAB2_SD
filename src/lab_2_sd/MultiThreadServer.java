@@ -67,42 +67,47 @@ public class MultiThreadServer implements Runnable {
             System.out.println("META DATA:      " + meta_data);  
             
             // Determinamos la particion a acceder con una funcion hash
-            //int ParticionDestino = hash(id, particiones.size());
-            //System.out.println("Particion destino: " + ParticionDestino);
+            int ParticionDestino = hash(id, particiones.size());
+            System.out.println("Particion destino: " + ParticionDestino);
             
             switch (http_method) {
-                case "GET":
+                case "GET":                    
+                    System.out.println("Buscando en el index de '" + resource + "' el registro con id " + id);                  
                     
-                    System.out.println("Buscando en el index de '" + resource + "' el registro con id " + id);
-                    /*
+                    // buscar en el index la respuesta a la query
+                    String result = particiones.get(particiones.size()).getEntryFromIndex(id);
+                    String sentence, fromServer;
                     
-                    
-                    
-                    // buscar en el cache estatico la respuesta a la query
-                    String result = particiones.get(particiones.size()-1).getEntryFromCache(id);
-
-                    if(result != null){//Si está
-                        System.out.println("Entrada en el cache estático - Particion: "+(particiones.size()-1));
-                        // Mostramos el cache(querys y answers)
-                        particiones.get(particiones.size()-1).print(); System.out.println("");
-                    }else{ //Si no está en el caché estático, verifico a la particion correspondiente
-                        result = particiones.get(ParticionDestino).getEntryFromCache(id);
-                        // Mostramos el cache(querys y answers)
-                        particiones.get(ParticionDestino).print(); System.out.println("");
-                    }
-                    if (result == null) { // MISS
-                        System.out.println("MISS");
-                        //Enviamos miss al cliente
-                        outToClient.writeBytes("MISS\n");
-                    }else{
+                    // HIT
+                    if(result != null){
+                        System.out.println("Entrada en el Index encontrada, particion: "+ (particiones.size()) );
                         System.out.println("HIT");
+                        
+                        sentence = "POST /consulta/" + id;
+                        
+                        try ( 
+                            //Socket para el cliente (host, puerto)
+                            Socket clientSocket = new Socket("localhost", 1234)) {
+                            //Buffer para enviar el dato al server
+                            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+                            //Buffer para recibir dato del servidor
+                            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                            //Leemos del cliente y lo mandamos al servidor
+                            outToServer.writeBytes(sentence + '\n');
+                            //Recibimos del servidor
+                            fromServer = inFromServer.readLine();
+                            System.out.println("Cache response: " + fromServer);
+                            //Cerramos el socket
+                            clientSocket.close();
+                        }
+                        
                         // Enviamos hit al cliente
                         outToClient.writeBytes(result+"\n");
-                    }
-                    
-                    
-                    
-                    */
+                    // MISS
+                    }else{
+                        //Enviamos miss al cliente
+                        outToClient.writeBytes("MISS\n");
+                    }                    
                     break;
                 default:
                     break;
