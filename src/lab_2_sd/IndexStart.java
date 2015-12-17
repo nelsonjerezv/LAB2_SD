@@ -8,6 +8,9 @@ package lab_2_sd;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  *
@@ -32,8 +35,8 @@ public class IndexStart {
         BufferedReader bf = new BufferedReader(fr);
         String parametro;
         int counter = 0;
-        int miPuerto;
-        int nParticiones;
+        int miPuerto = 0;
+        int nParticiones = 0;
         
         while( (parametro = bf.readLine() ) != null ){
             switch (counter) {
@@ -54,6 +57,20 @@ public class IndexStart {
         
         // ************************************************ \\
         
+        ArrayList<Index> Particiones = new ArrayList();
+        // tam particion = asdasdasd
+        for (int i = 0; i < nParticiones; i++) {
+            Index index = new Index(/* var tamano */);
+            Particiones.add(index);
+        }
+        
+        ServerSocket ssock = new ServerSocket(miPuerto);
+        
+        while (true) {
+           Socket sock = ssock.accept();
+           System.out.println("Connected");
+           new Thread(new MultiThreadServer(sock, Particiones)).start();
+        }
         
     }
     
