@@ -5,6 +5,9 @@
  */
 package lab_2_sd;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.xml.sax.Attributes;  
 import org.xml.sax.SAXException;  
 import org.xml.sax.helpers.DefaultHandler;  
@@ -46,9 +49,16 @@ public class ManejadorEjemplo extends DefaultHandler{
            System.out.println(titulo);
        }
        if (localName.equals("page")){
-           System.out.println(valor);
-           valor = "";
-           System.out.println("----------------------");
+           try {
+               //System.out.println(valor);
+               valor = filtroStopWords.filtrar(valor);
+               System.out.println("*********************************************************************************");
+               //System.out.println(valor);
+               valor = "";
+               System.out.println("----------------------");
+           } catch (IOException ex) {
+               Logger.getLogger(ManejadorEjemplo.class.getName()).log(Level.SEVERE, null, ex);
+           }
         }
        if (localName.equals("siteinfo")){
            valor = "";

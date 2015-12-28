@@ -33,7 +33,7 @@ public class ProcesaXML {
          // Añadimos nuestro manejador al reader  
          reader.setContentHandler(new ManejadorEjemplo());           
          // Procesamos el xml de ejemplo  
-         reader.parse(new InputSource(new FileInputStream("C:\\Users\\Rodrigo\\Downloads\\prueba.xml")));  
+         reader.parse(new InputSource(new FileInputStream("C:\\Users\\Nelson\\Desktop\\eswiki-20151202-pages-meta-current1.xml")));  
       } catch (SAXException e) {  
          e.printStackTrace();  
       } catch (IOException e) {  

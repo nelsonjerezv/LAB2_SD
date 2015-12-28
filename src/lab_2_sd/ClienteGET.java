@@ -21,7 +21,7 @@ public class ClienteGET {
         
         for (String request : requests) {
             //Socket para el cliente (host, puerto)
-            Socket clientSocket = new Socket("localhost", 1234);
+            Socket clientSocket = new Socket("localhost", 1235);
 
             //Buffer para enviar el dato al server
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
