@@ -19,24 +19,7 @@ import java.util.*;
 public class filtroStopWords {
 
     static String filtrar(String cadena) throws FileNotFoundException, IOException {
-        FileReader fr = new FileReader("stop-words-spanish.txt");
-        
-        if(fr == null){
-            System.out.println("Archivo erroneo");
-            System.exit(1);
-        }
-        BufferedReader bf = new BufferedReader(fr);
-        
-        ArrayList<String>palabras = new ArrayList();
-        String aux1;
-        
-        while( (aux1 = bf.readLine() ) != null ){
-            palabras.add(aux1);
-        }
-        
-        bf.close();
-        fr.close();        
-        
+              
         // reemplazamos caracteres especiales        
         cadena = cadena.replaceAll("[Ñ]","N");
         cadena = cadena.replaceAll("[ñ]","n");
@@ -56,9 +39,11 @@ public class filtroStopWords {
         cadena = cadena.replaceAll("[|.,<>=/:;]"," ");        
         cadena = cadena.replaceAll("[^a-z \\nA-Z]","");
         
+        cadena = cadena.toLowerCase();
+        
         // eliminamos las stopwords, los espacios aseguran no eliminar parte de palabras
-        for (int i = 0; i < palabras.size(); i++) {
-            cadena = cadena.replace( (" " + palabras.get(i) + " " ), " ");
+        for (int i = 0; i < ProcesaXML.palabras.size(); i++) {
+            cadena = cadena.replace( (" " + ProcesaXML.palabras.get(i) + " " ), " ");
         }
         
         return cadena;
