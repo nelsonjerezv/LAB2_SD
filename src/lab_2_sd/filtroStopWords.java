@@ -35,23 +35,30 @@ public class filtroStopWords {
         }
         
         bf.close();
-        fr.close();
+        fr.close();        
         
-        String delim =".,:;\\]\\[\\}\\{-_";
+        // reemplazamos caracteres especiales        
+        cadena = cadena.replaceAll("[Ñ]","N");
+        cadena = cadena.replaceAll("[ñ]","n");
         
+        cadena = cadena.replaceAll("[èéêë]","e");
+        cadena = cadena.replaceAll("[ùúûü]","u");
+        cadena = cadena.replaceAll("[ìíîï]","i");
+        cadena = cadena.replaceAll("[àáâä]","a");
+        cadena = cadena.replaceAll("[òóôö]","o");
+
+        cadena = cadena.replaceAll("[ÈÉÊË]","E");
+        cadena = cadena.replaceAll("[ÙÚÛÜ]","U");
+        cadena = cadena.replaceAll("[ÌÍÎÏ]","I");
+        cadena = cadena.replaceAll("[ÀÁÂÄ]","A");
+        cadena = cadena.replaceAll("[ÒÓÔÖ]","O");
+        
+        cadena = cadena.replaceAll("[|.,<>=/:;]"," ");        
+        cadena = cadena.replaceAll("[^a-z \\nA-Z]","");
+        
+        // eliminamos las stopwords, los espacios aseguran no eliminar parte de palabras
         for (int i = 0; i < palabras.size(); i++) {
-            //System.out.println(palabras.get(i));
-        }
-        
-        
-        String[] cadenaArray = cadena.split(delim);
-        
-        cadena = Arrays.toString(cadenaArray);
-        
-        System.out.println(cadena);
-        
-        for (int i = 0; i < palabras.size(); i++) {
-            cadena = cadena.replace(palabras.get(i), "");
+            cadena = cadena.replace( (" " + palabras.get(i) + " " ), " ");
         }
         
         return cadena;

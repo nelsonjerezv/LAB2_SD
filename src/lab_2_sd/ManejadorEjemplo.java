@@ -53,7 +53,7 @@ public class ManejadorEjemplo extends DefaultHandler{
                //System.out.println(valor);
                valor = filtroStopWords.filtrar(valor);
                System.out.println("*********************************************************************************");
-               //System.out.println(valor);
+               System.out.println(valor);
                valor = "";
                System.out.println("----------------------");
            } catch (IOException ex) {
