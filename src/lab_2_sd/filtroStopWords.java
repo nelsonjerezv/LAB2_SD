@@ -5,12 +5,8 @@
  */
 package lab_2_sd;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.*;
 
 /**
  *
@@ -38,8 +34,10 @@ public class filtroStopWords {
         
         cadena = cadena.replaceAll("[|.,<>=/:;]"," ");        
         cadena = cadena.replaceAll("[^a-z \\nA-Z]","");
+        cadena = cadena.replaceAll("\\s+", " ");
         
         cadena = cadena.toLowerCase();
+        cadena = cadena.trim();
         
         // eliminamos las stopwords, los espacios aseguran no eliminar parte de palabras
         for (int i = 0; i < ProcesaXML.palabras.size(); i++) {

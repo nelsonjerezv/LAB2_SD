@@ -31,7 +31,7 @@ public class ProcesaXML {
     
     public static ArrayList<String> palabras;
   
-    public static void main(String[] args) throws FileNotFoundException, IOException {  
+    public static void main(String[] args) throws FileNotFoundException, IOException, SAXException {  
         
         try (FileReader fr = new FileReader("stop-words-spanish.txt")) {
             if(fr == null){
@@ -48,18 +48,14 @@ public class ProcesaXML {
             }
         }
         
-        try {  
+          
             // Creamos la factoria de parseadores por defecto  
             XMLReader reader = XMLReaderFactory.createXMLReader();  
             // Añadimos nuestro manejador al reader  
             reader.setContentHandler(new ManejadorEjemplo());           
             // Procesamos el xml de ejemplo  
-            reader.parse(new InputSource(new FileInputStream("C:\\Users\\Nelson\\Desktop\\eswiki-20151202-pages-meta-current1.xml")));  
-        } catch (SAXException e) {  
-            e.printStackTrace();  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
+            reader.parse(new InputSource(new FileInputStream("C:\\Users\\Nelson\\Desktop\\sub.xml")));  
+        
   
    }  
   

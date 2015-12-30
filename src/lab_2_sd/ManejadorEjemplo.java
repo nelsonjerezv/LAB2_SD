@@ -67,7 +67,7 @@ public class ManejadorEjemplo extends DefaultHandler{
                               
                BasicDBObject document = new BasicDBObject();
                document.put("titulo", titulo);
-               //document.put("cuerpo", valor);
+               document.put("cuerpo", valor);
                coleccion.insert(document);
                
                valor = "";
