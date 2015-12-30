@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import javax.management.Query;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
  
 public class InvertedIndex {
     
@@ -38,7 +41,7 @@ public class InvertedIndex {
 
     public static List<String> stopwords;
 
-    static Map<String, List<Tuple>> index = new HashMap<>();
+    static Map<String, List<Tuple3>> index = new HashMap<>();
     static List<String> files = new ArrayList<>();
 
     public void indexFile(String titulo, String cuerpo) throws IOException {
@@ -80,13 +83,13 @@ public class InvertedIndex {
             if (stopwords.contains(word))
                     continue;
             // cargo (palabra, [( doc, ocurrencias  ),...] )
-            List<Tuple> idx = index.get(word);
+            List<Tuple3> idx = index.get(word);
             // si no existe en el indice la palabra, creo una lista de 
             // values(doc, ocurrencias) i agrego el doc,ocurrencia
             if (idx == null) {
                 idx = new LinkedList<>();
                 index.put(word, idx);
-                idx.add(new Tuple(fileno, 1));
+                idx.add(new Tuple3(files.get(fileno), fileno, 1));
             }
             // Si ya existe la palabra en el indice
             // busco el documento en los values asociados
@@ -103,7 +106,7 @@ public class InvertedIndex {
                 // si no existe este documento en el indice
                 // agrego documento contando una ocurrencia
                 if(flag == false){
-                    idx.add(new Tuple(fileno, 1));
+                    idx.add(new Tuple3(files.get(fileno), fileno, 1));
                     flag = true;
                 }
             }
@@ -112,49 +115,108 @@ public class InvertedIndex {
         System.out.println("indexed " + titulo + " " + pos + " words");
     }
 
-    public static void search(List<String> words) {
+    public static void search(List<String> words) throws JSONException {
         List<Tuple3> answer = new LinkedList<>();
         List<Tuple3> respuesta = new LinkedList<>();
         
         BasicDBObject inQuery = new BasicDBObject();
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (int i = 0; i < words.size(); i++) {
             list.add(words.get(i));
         }
         inQuery.put("key", new BasicDBObject("$in", list));
         DBCursor cursor = index_db.find(inQuery);
-        //index_db.find(new Query(Criteria.where("values.key").is(list.get(0)))), ParentDocument.class));
+
         while(cursor.hasNext()) {
-//            DBObject query = index_db.findOne(inQuery);
-//            String asd = query.get();
-            System.out.println(cursor.next().get("values"));
-            //**********************************************************************************
+            DBObject obj = cursor.next();
+            String asd = obj.get("values").toString();
             
-            BasicDBObject set = new BasicDBObject("$inc", new BasicDBObject("id", -10));
+            String findStr = "docID";
+            int lastIndex = 0, count = 0;
 
-            if ("male".equals(cursor.next().get("gender")))
-                set.append("$set", new BasicDBObject("name", "Sir ".concat((String) cursor.curr().get("name"))));
-            else
-                set.append("$set", new BasicDBObject("name", "Mme ".concat((String) cursor.curr().get("name"))));
-
-            //coll.update(cursor.curr(), set);
+            while(lastIndex != -1){
+                lastIndex = asd.indexOf(findStr,lastIndex);
+                if(lastIndex != -1){
+                    count ++;
+                    lastIndex += findStr.length();
+                }
+            }
             
-            //**********************************************************************************
-            //String[] resp2 = resp.split(" ,");
-            //System.out.println(resp2);
+            List<List<Object>> response = new ArrayList<>();
+            
+            String xtr = asd.replaceAll("[a-zA-Z\\[\\]\\{\\}\":, ]", " ");
+            xtr = xtr.replaceAll("\\s+", " ");
+            //System.out.println("xtr: "+xtr);
+            String[] items = xtr.split(" ");
+            
+            int[] results = new int[items.length];
+            for (int i = 0; i < items.length; i++) {
+                try {
+                    results[i] = Integer.parseInt(items[i]);
+                } catch (NumberFormatException nfe) {};
+            }            
+            for (int i = 0; i < count; i++) {
+                response.add(new ArrayList<>());
+                for (int j = 0; j < 2; j++) {
+                    response.get(i).add(results[i*2+j+1]);
+                }
+            }
+            
+            for (int i = 0; i < count; i++) {                   
+                DBCursor cur = coleccion.find();
+                cur.skip((int) response.get(i).get(0));
+                cur.next();
+                DBObject doc= cur.curr();
+                
+                boolean presente = false;
+                for (int j = 0; j < respuesta.size(); j++) {                    
+                    // si la estoy mostrando
+                    if(respuesta.get(j).titulo.equals(doc.get("titulo"))){
+                        // sumo la cantidad de ocurrencias(por cada palabra de la query)
+                        // a.k.a. query = "hoy mismo"
+                        // -> hoy   -> doc3, 4 ocurrencias
+                        // -> mismo -> doc3, 2 ocurrencias
+                        // answer -> doc3, (4+2) ocurrencias
+                        // asi rankeo las respuestas
+                        respuesta.get(j).count = respuesta.get(j).count + (int) response.get(i).get(1);
+                        presente = true;
+                    }
+                }
+                // si no la estoy mostrando en mi respuesta
+                if(presente == false){
+                    // la agrego
+                    respuesta.add(new Tuple3(doc.get("titulo").toString(), (int) response.get(i).get(0), (int) response.get(i).get(1) ));  
+                    presente = true;
+                }
+//                System.out.println("Titulo: " + doc.get("titulo") + ", ocurrencias: " + response.get(i).get(1));
+            }
         }
         
-        
-        
+        // ordenamos de mayor a menor cantidad de ocurrencias las respuestas
+        Collections.sort(respuesta, new Tuple3Comparator() );
+        Collections.reverse(respuesta);
 
+        System.out.print("Busqueda: " + words + "\nResultados: ");
+        for (Tuple3 f : respuesta) {
+            
+            DBCursor cur = coleccion.find();
+            cur.skip(f.fileno);
+            cur.next();
+            DBObject doc= cur.curr();
+            
+            System.out.print("\n   " + f.titulo + ", ocurrencias: " + f.count);
+        }
+        System.out.println("");        
+        
+        //<editor-fold defaultstate="collapsed" desc="comment">
         for (int i=0; i<words.size(); i++) {
             String word = words.get(i).toLowerCase();
             // para cada palabra cargo sus values(doc, ocurrencias)
-            List<Tuple> idx = index.get(word);
+            List<Tuple3> idx = index.get(word);
             // si existen values
             if (idx != null) {
                 // para cada tupla que existe
-                for (Tuple t : idx) {
+                for (Tuple3 t : idx) {
                     Tuple3 e = new Tuple3(files.get(t.fileno),(int)t.fileno ,(int)t.count);
                     boolean presente = false;
                     for(int j=0; j<answer.size(); j++){
@@ -169,31 +231,34 @@ public class InvertedIndex {
                             answer.get(j).count = answer.get(j).count + e.count;
                             presente = true;
                         }
-                    }                                                
+                    }
                     // si no la estoy mostrando en mi respuesta
                     if(presente == false){
                         // la agrego
-                        answer.add(e);  
+                        answer.add(e);
                         presente = true;
-                    }                        
+                    }
                 }
             }
-            //*********************************************************************************
-            // para cada palabra cargo sus values(doc, ocurrencias)
-//            List<Tuple> idk;
-//            DBObject entry = index_db.find(word);
-//            idk = index_db.find(word);
         }
+//</editor-fold>
 
-        // ordenamos de mayor a menor cantidad de ocurrencias las respuestas
-        Collections.sort(answer, new Tuple3Comparator() );
-        Collections.reverse(answer);
+//        // ordenamos de mayor a menor cantidad de ocurrencias las respuestas
+//        Collections.sort(answer, new Tuple3Comparator() );
+//        Collections.reverse(answer);
+//
+//        System.out.print("Busqueda: " + words + "\nResultados: ");
+//        for (Tuple3 f : answer) {
+//            
+//            DBCursor cur = coleccion.find();
+//            cur.skip(f.fileno);
+//            cur.next();
+//            DBObject doc= cur.curr();
+//            
+//            System.out.print("\n   " + f.titulo + ", ocurrencias: " + f.count);
+//        }
+//        System.out.println("");
 
-        System.out.print("Busqueda: " + words + "\nResultados: ");
-        for (Tuple3 f : answer) {
-                System.out.print("\n   " + f.titulo + ", ocurrencias: " + f.count);
-        }
-        System.out.println("");
     }
 
     public static void indexar(InvertedIndex idx) throws IOException {
@@ -231,10 +296,10 @@ public class InvertedIndex {
         }
         
         // para cada entrada del index(java)
-        Iterator<Map.Entry<String,List<Tuple>>> itr1 = index.entrySet().iterator();
+        Iterator<Map.Entry<String,List<Tuple3>>> itr1 = index.entrySet().iterator();
         while(itr1.hasNext()) {
-            Map.Entry<String,List<Tuple>> entry = itr1.next();
-            List<Tuple> values = index.get(entry.getKey());
+            Map.Entry<String,List<Tuple3>> entry = itr1.next();
+            List<Tuple3> values = index.get(entry.getKey());
             
             // se crea nueva entrada de index(mongoDB)
             BasicDBObject document = new BasicDBObject();
@@ -258,7 +323,7 @@ public class InvertedIndex {
         
     }
 
-    public void buscar(InvertedIndex idx, String query){
+    public void buscar(InvertedIndex idx, String query) throws JSONException{
         search(Arrays.asList(query.split(",")));
     }
 
