@@ -57,8 +57,6 @@ public class IndexStart {
             }
         }
         
-        // ************************************************ \\
-        
         ArrayList<Index> Particiones = new ArrayList();
         // tam particion = asdasdasd
         for (int i = 0; i < nParticiones; i++) {
