@@ -5,6 +5,10 @@
  */
 package lab_2_sd;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.Mongo;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +20,11 @@ public class ManejadorEjemplo extends DefaultHandler{
     private String valor = "";
     private String cadena = "";
     private String titulo = "";
+    
+    Mongo mongo = new Mongo("localhost",27017);
+    
+    DB db = mongo.getDB("test");
+    DBCollection coleccion = db.getCollection("test");
 
    @Override  
    public void startDocument() throws SAXException {  
@@ -46,16 +55,26 @@ public class ManejadorEjemplo extends DefaultHandler{
          throws SAXException {  
        if(localName.equals("title")){
            titulo = valor;
-           System.out.println(titulo);
+//           System.out.println(titulo);
        }
        if (localName.equals("page")){
            try {
                //System.out.println(valor);
                valor = filtroStopWords.filtrar(valor);
-               System.out.println("*********************************************************************************");
+               //System.out.println("*********************************************************************************");
+               System.out.println(titulo);
                System.out.println(valor);
+               
+               titulo = titulo.replaceAll("[^a-z A-Z]","");
+                              
+               BasicDBObject document = new BasicDBObject();
+               document.put("titulo", titulo);
+               //document.put("cuerpo", valor);
+               coleccion.insert(document);
+               
                valor = "";
                System.out.println("----------------------");
+               
            } catch (IOException ex) {
                Logger.getLogger(ManejadorEjemplo.class.getName()).log(Level.SEVERE, null, ex);
            }
