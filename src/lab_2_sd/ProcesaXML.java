@@ -54,6 +54,7 @@ public class ProcesaXML {
             // Añadimos nuestro manejador al reader  
             reader.setContentHandler(new ManejadorEjemplo());           
             // Procesamos el xml de ejemplo  
+            //reader.parse(new InputSource(new FileInputStream("C:\\Users\\Nelson\\Desktop\\sub.xml")));  
             reader.parse(new InputSource(new FileInputStream("C:\\Users\\Nelson\\Desktop\\sub.xml")));  
         
   

@@ -114,6 +114,24 @@ public class InvertedIndex {
     public static void search(List<String> words) {
         List<Tuple3> answer = new LinkedList<>();
         List<Tuple3> respuesta = new LinkedList<>();
+        
+        
+        
+        
+        
+        BasicDBObject inQuery = new BasicDBObject();
+        List<String> list = new ArrayList<String>();
+        for (int i = 0; i < words.size(); i++) {
+            list.add(words.get(i));
+        }
+        inQuery.put("key", new BasicDBObject("$in", list));
+        DBCursor cursor = index_db.find(inQuery);
+        while(cursor.hasNext()) {
+            System.out.println(cursor.next().containsField("values"));
+        }
+        
+        
+        
 
         for (int i=0; i<words.size(); i++) {
             String word = words.get(i).toLowerCase();
@@ -147,7 +165,10 @@ public class InvertedIndex {
                 }
             }
             //*********************************************************************************
-            
+            // para cada palabra cargo sus values(doc, ocurrencias)
+//            List<Tuple> idk;
+//            DBObject entry = index_db.find(word);
+//            idk = index_db.find(word);
         }
 
         // ordenamos de mayor a menor cantidad de ocurrencias las respuestas
