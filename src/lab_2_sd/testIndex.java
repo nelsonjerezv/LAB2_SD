@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
-import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 /**
@@ -18,7 +17,7 @@ import org.xml.sax.SAXException;
  */
 public class testIndex {
     
-    public static void main(String[] args) throws FileNotFoundException, IOException, SAXException, JSONException { 
+    public static void main(String[] args) throws FileNotFoundException, IOException, SAXException{ 
         InvertedIndex idx = new InvertedIndex();
         InvertedIndex.indexar(idx);
         while(true){

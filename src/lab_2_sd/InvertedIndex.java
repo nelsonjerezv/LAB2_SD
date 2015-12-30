@@ -24,10 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import javax.management.Query;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
  
 public class InvertedIndex {
     
@@ -115,7 +111,7 @@ public class InvertedIndex {
         System.out.println("indexed " + titulo + " " + pos + " words");
     }
 
-    public static void search(List<String> words) throws JSONException {
+    public static void search(List<String> words){
         List<Tuple3> answer = new LinkedList<>();
         List<Tuple3> respuesta = new LinkedList<>();
         
@@ -323,7 +319,7 @@ public class InvertedIndex {
         
     }
 
-    public void buscar(InvertedIndex idx, String query) throws JSONException{
+    public void buscar(InvertedIndex idx, String query){
         search(Arrays.asList(query.split(",")));
     }
 
