@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class filtroStopWords {
 
-    static String filtrar(String cadena) throws FileNotFoundException, IOException {
+    static String filtrarSW(String cadena) throws FileNotFoundException, IOException {
               
         // reemplazamos caracteres especiales        
         cadena = cadena.replaceAll("[Ñ]","N");
@@ -45,6 +45,31 @@ public class filtroStopWords {
         for (int i = 0; i < ProcesaXML.palabras.size(); i++) {
             cadena = cadena.replace( (" " + ProcesaXML.palabras.get(i) + " " ), " ");
         }
+        
+        return cadena;
+    }
+
+    static String filtrar(String cadena) {
+        
+        // reemplazamos caracteres especiales        
+        cadena = cadena.replaceAll("[Ñ]","N");
+        cadena = cadena.replaceAll("[ñ]","n");
+        
+        cadena = cadena.replaceAll("[èéêë]","e");
+        cadena = cadena.replaceAll("[ùúûü]","u");
+        cadena = cadena.replaceAll("[ìíîï]","i");
+        cadena = cadena.replaceAll("[àáâä]","a");
+        cadena = cadena.replaceAll("[òóôö]","o");
+
+        cadena = cadena.replaceAll("[ÈÉÊË]","E");
+        cadena = cadena.replaceAll("[ÙÚÛÜ]","U");
+        cadena = cadena.replaceAll("[ÌÍÎÏ]","I");
+        cadena = cadena.replaceAll("[ÀÁÂÄ]","A");
+        cadena = cadena.replaceAll("[ÒÓÔÖ]","O");
+        
+        cadena = cadena.replaceAll("[|.,<>=/:;]"," ");        
+        cadena = cadena.replaceAll("[^a-z \\nA-Z]","");
+        cadena = cadena.trim();
         
         return cadena;
     }

@@ -59,13 +59,11 @@ public class ManejadorEjemplo extends DefaultHandler{
        }
        if (localName.equals("page")){
            try {
-               //System.out.println(valor);
-               valor = filtroStopWords.filtrar(valor);
+               titulo = filtroStopWords.filtrar(titulo);
+               valor = filtroStopWords.filtrarSW(valor);
                //System.out.println("*********************************************************************************");
                System.out.println(titulo);
                System.out.println(valor);
-               
-               titulo = titulo.replaceAll("[^a-z A-Z]","");
                               
                BasicDBObject document = new BasicDBObject();
                document.put("titulo", titulo);
