@@ -24,17 +24,9 @@ public class testIndex {
             
             Scanner scanner = new Scanner(System.in);
 
- 
-
-            // Read values from Console
-
- 
-
-            // A String value
-
             System.out.print("entrada: ");
 
-            String input = scanner.next();
+            String input = scanner.nextLine();
 
             System.out.println("la entrada fue: "+input);
             
