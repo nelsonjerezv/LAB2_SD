@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.management.Query;
  
 public class InvertedIndex {
     
@@ -115,10 +116,6 @@ public class InvertedIndex {
         List<Tuple3> answer = new LinkedList<>();
         List<Tuple3> respuesta = new LinkedList<>();
         
-        
-        
-        
-        
         BasicDBObject inQuery = new BasicDBObject();
         List<String> list = new ArrayList<String>();
         for (int i = 0; i < words.size(); i++) {
@@ -126,8 +123,25 @@ public class InvertedIndex {
         }
         inQuery.put("key", new BasicDBObject("$in", list));
         DBCursor cursor = index_db.find(inQuery);
+        //index_db.find(new Query(Criteria.where("values.key").is(list.get(0)))), ParentDocument.class));
         while(cursor.hasNext()) {
-            System.out.println(cursor.next().containsField("values"));
+//            DBObject query = index_db.findOne(inQuery);
+//            String asd = query.get();
+            System.out.println(cursor.next().get("values"));
+            //**********************************************************************************
+            
+            BasicDBObject set = new BasicDBObject("$inc", new BasicDBObject("id", -10));
+
+            if ("male".equals(cursor.next().get("gender")))
+                set.append("$set", new BasicDBObject("name", "Sir ".concat((String) cursor.curr().get("name"))));
+            else
+                set.append("$set", new BasicDBObject("name", "Mme ".concat((String) cursor.curr().get("name"))));
+
+            //coll.update(cursor.curr(), set);
+            
+            //**********************************************************************************
+            //String[] resp2 = resp.split(" ,");
+            //System.out.println(resp2);
         }
         
         
