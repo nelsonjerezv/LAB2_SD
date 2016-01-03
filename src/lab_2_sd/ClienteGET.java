@@ -3,6 +3,7 @@ package lab_2_sd;
 
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class ClienteGET {
     
@@ -11,9 +12,11 @@ public class ClienteGET {
         String fromServer;
        
         //Buffer para recibir desde consola
-        System.out.print("Consultar: ");
-        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-        String sentence = inFromUser.readLine();
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("entrada: ");
+
+        String sentence = scanner.nextLine();
         
         // estructura improvisada
         sentence = "GET /consulta/" + sentence;
@@ -21,7 +24,7 @@ public class ClienteGET {
         
         for (String request : requests) {
             //Socket para el cliente (host, puerto)
-            Socket clientSocket = new Socket("localhost", 1235);
+            Socket clientSocket = new Socket("localhost", 1236);
 
             //Buffer para enviar el dato al server
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());

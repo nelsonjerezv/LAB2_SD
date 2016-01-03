@@ -7,12 +7,16 @@ package lab_2_sd;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lab2_sd_mongo.InvertedIndex;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -67,42 +71,56 @@ public class MultiThreadServer implements Runnable {
             System.out.println("META DATA:      " + meta_data);  
             
             // Determinamos la particion a acceder con una funcion hash
-            int ParticionDestino = hash(id, particiones.size());
-            System.out.println("Particion destino: " + ParticionDestino);
+//            int ParticionDestino = hash(id, particiones.size());
+//            System.out.println("Particion destino: " + ParticionDestino);
             
             switch (http_method) {
                 case "GET":                    
                     System.out.println("Buscando en el index de '" + resource + "' el registro con id " + id);                  
                     
-                    // buscar en el index la respuesta a la query
-                    String result = particiones.get(particiones.size()).getEntryFromIndex(id);
+                    // buscar en el index la respuesta la query
+//                    String result = particiones.get(particiones.size()).getEntryFromIndex(id);
+                    String id_splitted[] = id.split(" ");
+                    System.out.println("id mide: " + id.length());
+                    ArrayList<String> input = new ArrayList();
+                    
+                    for (int i = 0; i < id_splitted.length; i++) {
+                        input.add(id_splitted[i]);
+                    }
+                    
+                    //System.out.println(Arrays.asList(id.split(" ")));
+                    //ArrayList<String> respuestas = (ArrayList<String>) InvertedIndex.search(input);
+                    ArrayList<String> respuestas = InvertedIndex.search(input, IndexStart.index_db, IndexStart.coleccion);
                     String sentence, fromServer;
                     
                     // HIT
-                    if(result != null){
+//                    if(result != null){
+                    if(!respuestas.isEmpty()){
                         System.out.println("Entrada en el Index encontrada, particion: "+ (particiones.size()) );
                         System.out.println("HIT");
                         
                         sentence = "POST /consulta/" + id;
                         
-                        try ( 
-                            //Socket para el cliente (host, puerto)
-                            Socket clientSocket = new Socket("localhost", 1234)) {
-                            //Buffer para enviar el dato al server
-                            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-                            //Buffer para recibir dato del servidor
-                            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                            //Leemos del cliente y lo mandamos al servidor
-                            outToServer.writeBytes(sentence + '\n');
-                            //Recibimos del servidor
-                            fromServer = inFromServer.readLine();
-                            System.out.println("Cache response: " + fromServer);
-                            //Cerramos el socket
-                            clientSocket.close();
-                        }
+//                        con esto enviamos al cache
+//                        try ( 
+//                            //Socket para el cliente (host, puerto)
+//                            Socket clientSocket = new Socket("localhost", 1234)) {
+//                            //Buffer para enviar el dato al server
+//                            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+//                            //Buffer para recibir dato del servidor
+//                            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//                            //Leemos del cliente y lo mandamos al servidor
+//                            outToServer.writeBytes(sentence + '\n');
+//                            //Recibimos del servidor
+//                            fromServer = inFromServer.readLine();
+//                            System.out.println("Cache response: " + fromServer);
+//                            //Cerramos el socket
+//                            clientSocket.close();
+//                        }
                         
                         // Enviamos hit al cliente
-                        outToClient.writeBytes(result+"\n");
+                        System.out.println("enviamos a front");
+                        outToClient.writeBytes(respuestas.toString());
                     // MISS
                     }else{
                         //Enviamos miss al cliente
