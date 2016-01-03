@@ -120,7 +120,8 @@ public class MultiThreadServer implements Runnable {
                         
                         // Enviamos hit al cliente
                         System.out.println("enviamos a front");
-                        outToClient.writeBytes(respuestas.toString());
+                        String ans = respuestas.toString();
+                        outToClient.writeBytes(ans+"\n");
                     // MISS
                     }else{
                         //Enviamos miss al cliente
