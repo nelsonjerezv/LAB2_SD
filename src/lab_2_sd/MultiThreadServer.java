@@ -134,8 +134,5 @@ public class MultiThreadServer implements Runnable {
         }
     }
 
-    private int hash(String id, int size) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
+     
 }

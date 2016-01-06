@@ -125,9 +125,8 @@ public class InvertedIndex {
         
         
         for (int k = 0; k < lab_2_sd.IndexStart.nParticiones; k++) {
-            DBCollection rename = lab_2_sd.IndexStart.db.createCollection("shard"+Integer.toString(k), null);
+            DBCollection rename = lab_2_sd.IndexStart.db.getCollection("shard"+Integer.toString(k));
             inQuery.put("key", new BasicDBObject("$in", list_part.get(k)));
-            System.out.println("XXXXXX " + inQuery);
             DBCursor cursor = rename.find(inQuery);
 
             while(cursor.hasNext()) {
@@ -445,7 +444,6 @@ public class InvertedIndex {
     }
     
     private static int hash(String id, int size) {
-        System.out.println("n particiones asd:" + size);
         int hash = 13;
         for (int i = 0; i < id.length(); i++) {
             hash = hash*31 + id.charAt(i);
@@ -454,7 +452,7 @@ public class InvertedIndex {
         hash = (int) Math.sqrt(hash*hash);
         // Determinamos la particion a ocupar
         hash = hash%size;
-        
+        System.out.println("hash es: "+hash+"   "+size);
         return hash;
     }
 }
