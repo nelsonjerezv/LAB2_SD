@@ -100,24 +100,37 @@ public class LAB2_SD_MONGO {
         
         mongo = new Mongo("localhost",puerto_mongoDB);
         db = mongo.getDB(nombre_BD);
-        coleccion = db.getCollection(nombre_coleccion_DB);
-        index_db = db.getCollection(nombre_coleccion_DB_Index);
+        if (!db.collectionExists("test")) {
+            System.out.println("asd");
+            coleccion = db.createCollection(nombre_coleccion_DB, null);
+
+        }else{
+            coleccion = db.getCollection("test");
+        }
+        if (!db.collectionExists("index")) {
+            System.out.println("qwe");
+            index_db = db.createCollection(nombre_coleccion_DB_Index,null);
+        }else{
+            index_db = db.getCollection("index");
+        }
         
-//        ProcesaXML.ProcesaXML(archivo_stopwords, ruta_XML);
-//        
-//        System.out.println("\nXML Index size: " + LAB2_SD_MONGO.index_db.count() + 
-//                          " Db size: " + LAB2_SD_MONGO.coleccion.count() + "\n");
-//        
-//        System.out.println("DB creada en Mongo, lista para indexar");        
-//        
-//        InvertedIndex.indexar();
-//        
-//        System.out.println("\nXML Index size: " + LAB2_SD_MONGO.index_db.count() + 
-//                          " Db size: " + LAB2_SD_MONGO.coleccion.count() + "\n");
-//        
-//        System.out.println("Index creado en Mongo, listo para ser usado");
-        System.out.println("id mide: " + "argentina".length());
-        ArrayList<String> asd = testIndex.testIndex("argentina");
+        
+        System.out.println("Procesamos...");
+        ProcesaXML.ProcesaXML(archivo_stopwords, ruta_XML);
+        
+        System.out.println("\nXML Index size: " + LAB2_SD_MONGO.index_db.count() + 
+                          " Db size: " + LAB2_SD_MONGO.coleccion.count() + "\n");
+        
+        System.out.println("DB creada en Mongo, lista para indexar");        
+        
+        InvertedIndex.indexar();
+        
+        System.out.println("\nXML Index size: " + LAB2_SD_MONGO.index_db.count() + 
+                          " Db size: " + LAB2_SD_MONGO.coleccion.count() + "\n");
+        
+        System.out.println("Index creado en Mongo, listo para ser usado");
+//        System.out.println("id mide: " + "argentina".length());
+//        ArrayList<String> asd = testIndex.testIndex("argentina");
     }
     
 }
