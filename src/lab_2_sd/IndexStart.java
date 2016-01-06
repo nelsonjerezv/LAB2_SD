@@ -29,6 +29,7 @@ public class IndexStart {
     public static String nombre_coleccion_DB = null;
     public static String nombre_coleccion_DB_Index = null;
     public static int puerto_mongoDB;
+    public static int nParticiones;
     
     /**
      * @param args the command line arguments
@@ -48,7 +49,6 @@ public class IndexStart {
         String parametro;
         int counter = 0;
         int miPuerto = 0;
-        int nParticiones = 0;
         
         while( (parametro = bf.readLine() ) != null ){
             if(parametro.charAt(0) != '/'){
@@ -97,6 +97,7 @@ public class IndexStart {
         }
         
         ServerSocket ssock = new ServerSocket(miPuerto);
+        System.out.println("Listening...");
         while (true) {
            Socket sock = ssock.accept();
            System.out.println("Connected");

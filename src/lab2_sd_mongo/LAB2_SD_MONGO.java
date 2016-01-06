@@ -31,7 +31,9 @@ public class LAB2_SD_MONGO {
     
     public static DB db;
     public static DBCollection coleccion;
+    public static DBCollection test;
     public static DBCollection index_db;
+    public static DBCollection index_part[];
     public static Mongo mongo;
     public static String parametro;
     public static String ruta_XML = null;
@@ -43,6 +45,8 @@ public class LAB2_SD_MONGO {
     public static int counter = 0;
     public static int indexar = 0;
     public static int cargar_BD = 0;
+    public static int particiones = 0;
+    public static DBCollection shard;
     
     public static void main(String[] args) throws IOException, FileNotFoundException, SAXException {
         // Lectura de parametros
@@ -90,6 +94,10 @@ public class LAB2_SD_MONGO {
                         archivo_stopwords = parametro;
                         System.out.println("parametro " + counter + ": " + archivo_stopwords);
                         break;
+                    case 8:
+                        particiones = Integer.parseInt(parametro);
+                        System.out.println("parametro " + counter + ": " + particiones);
+                        break;
                     default:
                         System.out.println("parametro " + counter + ": " + parametro);
                         break;
@@ -100,6 +108,7 @@ public class LAB2_SD_MONGO {
         
         mongo = new Mongo("localhost",puerto_mongoDB);
         db = mongo.getDB(nombre_BD);
+        test = db.createCollection("asdasdasd", null);
         if (!db.collectionExists("test")) {
             System.out.println("asd");
             coleccion = db.createCollection(nombre_coleccion_DB, null);
@@ -113,6 +122,10 @@ public class LAB2_SD_MONGO {
         }else{
             index_db = db.getCollection("index");
         }
+        //**********************************************************
+        
+        
+        //**********************************************************
         
         
         System.out.println("Procesamos...");

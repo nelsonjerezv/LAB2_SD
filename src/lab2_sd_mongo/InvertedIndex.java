@@ -114,76 +114,160 @@ public class InvertedIndex {
             list.add(words.get(i));
         }
         
-        inQuery.put("key", new BasicDBObject("$in", list));
-        System.out.println("XXXXXX " + inQuery);
-        DBCursor cursor = index_db.find(inQuery);
+        List<List<String>> list_part= new ArrayList<>();
+        for (int i = 0; i < lab_2_sd.IndexStart.nParticiones; i++) {
+            list_part.add(new ArrayList<>());
+        }
+        for (int i = 0; i < words.size(); i++) {
+            list_part.get(hash(words.get(i), lab_2_sd.IndexStart.nParticiones)).add(words.get(i));
+        }
+        System.out.println(list_part);
+        
+        
+        for (int k = 0; k < lab_2_sd.IndexStart.nParticiones; k++) {
+            DBCollection rename = lab_2_sd.IndexStart.db.createCollection("shard"+Integer.toString(k), null);
+            inQuery.put("key", new BasicDBObject("$in", list_part.get(k)));
+            System.out.println("XXXXXX " + inQuery);
+            DBCursor cursor = rename.find(inQuery);
 
-        while(cursor.hasNext()) {
-            DBObject obj = cursor.next();
-            String asd = obj.get("values").toString();
-            
-            String findStr = "docID";
-            int lastIndex = 0, count = 0;
+            while(cursor.hasNext()) {
+                DBObject obj = cursor.next();
+                String asd = obj.get("values").toString();
 
-            while(lastIndex != -1){
-                lastIndex = asd.indexOf(findStr,lastIndex);
-                if(lastIndex != -1){
-                    count ++;
-                    lastIndex += findStr.length();
+                String findStr = "docID";
+                int lastIndex = 0, count = 0;
+
+                while(lastIndex != -1){
+                    lastIndex = asd.indexOf(findStr,lastIndex);
+                    if(lastIndex != -1){
+                        count ++;
+                        lastIndex += findStr.length();
+                    }
                 }
-            }
-            
-            System.out.println("count: " + count);
-            
-            List<List<Object>> response = new ArrayList<>();
-            
-            String xtr = asd.replaceAll("[a-zA-Z\\[\\]\\{\\}\":, ]", " ");
-            xtr = xtr.replaceAll("\\s+", " ");
-            String[] items = xtr.split(" ");
-            
-            int[] results = new int[items.length];
-            for (int i = 0; i < items.length; i++) {
-                try {
-                    results[i] = Integer.parseInt(items[i]);
-                } catch (NumberFormatException nfe) {
-                
+
+                System.out.println("count: " + count);
+
+                List<List<Object>> response = new ArrayList<>();
+
+                String xtr = asd.replaceAll("[a-zA-Z\\[\\]\\{\\}\":, ]", " ");
+                xtr = xtr.replaceAll("\\s+", " ");
+                String[] items = xtr.split(" ");
+
+                int[] results = new int[items.length];
+                for (int i = 0; i < items.length; i++) {
+                    try {
+                        results[i] = Integer.parseInt(items[i]);
+                    } catch (NumberFormatException nfe) {
+
+                    }
+                }            
+                for (int i = 0; i < count; i++) {
+                    response.add(new ArrayList<>());
+                    for (int j = 0; j < 2; j++) {
+                        response.get(i).add(results[i*2+j+1]);
+                    }
                 }
-            }            
-            for (int i = 0; i < count; i++) {
-                response.add(new ArrayList<>());
-                for (int j = 0; j < 2; j++) {
-                    response.get(i).add(results[i*2+j+1]);
-                }
-            }
-            
-            for (int i = 0; i < count; i++) {                   
-                DBCursor cur = coleccion.find();
-                cur.skip((int) response.get(i).get(0));
-                cur.next();
-                DBObject doc= cur.curr();
-                
-                boolean presente = false;
-                for (int j = 0; j < respuesta.size(); j++) {                    
-                    // si la estoy mostrando
-                    if(respuesta.get(j).titulo.equals(doc.get("titulo"))){
-                        // sumo la cantidad de ocurrencias(por cada palabra de la query)
-                        // a.k.a. query = "hoy mismo"
-                        // -> hoy   -> doc3, 4 ocurrencias
-                        // -> mismo -> doc3, 2 ocurrencias
-                        // answer -> doc3, (4+2) ocurrencias
-                        // asi rankeo las respuestas
-                        respuesta.get(j).count = respuesta.get(j).count + (int) response.get(i).get(1);
+
+                for (int i = 0; i < count; i++) {                   
+                    DBCursor cur = coleccion.find();
+                    cur.skip((int) response.get(i).get(0));
+                    cur.next();
+                    DBObject doc= cur.curr();
+
+                    boolean presente = false;
+                    for (int j = 0; j < respuesta.size(); j++) {                    
+                        // si la estoy mostrando
+                        if(respuesta.get(j).titulo.equals(doc.get("titulo"))){
+                            // sumo la cantidad de ocurrencias(por cada palabra de la query)
+                            // a.k.a. query = "hoy mismo"
+                            // -> hoy   -> doc3, 4 ocurrencias
+                            // -> mismo -> doc3, 2 ocurrencias
+                            // answer -> doc3, (4+2) ocurrencias
+                            // asi rankeo las respuestas
+                            respuesta.get(j).count = respuesta.get(j).count + (int) response.get(i).get(1);
+                            presente = true;
+                        }
+                    }
+                    // si no la estoy mostrando en mi respuesta
+                    if(presente == false){
+                        // la agrego
+                        respuesta.add(new Tuple3(doc.get("titulo").toString(), (int) response.get(i).get(0), (int) response.get(i).get(1) ));  
                         presente = true;
                     }
                 }
-                // si no la estoy mostrando en mi respuesta
-                if(presente == false){
-                    // la agrego
-                    respuesta.add(new Tuple3(doc.get("titulo").toString(), (int) response.get(i).get(0), (int) response.get(i).get(1) ));  
-                    presente = true;
-                }
             }
         }
+        
+//        inQuery.put("key", new BasicDBObject("$in", list));
+//        System.out.println("XXXXXX " + inQuery);
+//        DBCursor cursor = index_db.find(inQuery);
+//
+//        while(cursor.hasNext()) {
+//            DBObject obj = cursor.next();
+//            String asd = obj.get("values").toString();
+//            
+//            String findStr = "docID";
+//            int lastIndex = 0, count = 0;
+//
+//            while(lastIndex != -1){
+//                lastIndex = asd.indexOf(findStr,lastIndex);
+//                if(lastIndex != -1){
+//                    count ++;
+//                    lastIndex += findStr.length();
+//                }
+//            }
+//            
+//            System.out.println("count: " + count);
+//            
+//            List<List<Object>> response = new ArrayList<>();
+//            
+//            String xtr = asd.replaceAll("[a-zA-Z\\[\\]\\{\\}\":, ]", " ");
+//            xtr = xtr.replaceAll("\\s+", " ");
+//            String[] items = xtr.split(" ");
+//            
+//            int[] results = new int[items.length];
+//            for (int i = 0; i < items.length; i++) {
+//                try {
+//                    results[i] = Integer.parseInt(items[i]);
+//                } catch (NumberFormatException nfe) {
+//                
+//                }
+//            }            
+//            for (int i = 0; i < count; i++) {
+//                response.add(new ArrayList<>());
+//                for (int j = 0; j < 2; j++) {
+//                    response.get(i).add(results[i*2+j+1]);
+//                }
+//            }
+//            
+//            for (int i = 0; i < count; i++) {                   
+//                DBCursor cur = coleccion.find();
+//                cur.skip((int) response.get(i).get(0));
+//                cur.next();
+//                DBObject doc= cur.curr();
+//                
+//                boolean presente = false;
+//                for (int j = 0; j < respuesta.size(); j++) {                    
+//                    // si la estoy mostrando
+//                    if(respuesta.get(j).titulo.equals(doc.get("titulo"))){
+//                        // sumo la cantidad de ocurrencias(por cada palabra de la query)
+//                        // a.k.a. query = "hoy mismo"
+//                        // -> hoy   -> doc3, 4 ocurrencias
+//                        // -> mismo -> doc3, 2 ocurrencias
+//                        // answer -> doc3, (4+2) ocurrencias
+//                        // asi rankeo las respuestas
+//                        respuesta.get(j).count = respuesta.get(j).count + (int) response.get(i).get(1);
+//                        presente = true;
+//                    }
+//                }
+//                // si no la estoy mostrando en mi respuesta
+//                if(presente == false){
+//                    // la agrego
+//                    respuesta.add(new Tuple3(doc.get("titulo").toString(), (int) response.get(i).get(0), (int) response.get(i).get(1) ));  
+//                    presente = true;
+//                }
+//            }
+//        }
         
         // ordenamos de mayor a menor cantidad de ocurrencias las respuestas
         Collections.sort(respuesta, new Tuple3Comparator() );
@@ -319,18 +403,17 @@ public class InvertedIndex {
             // ingresamos los valores
             document.put("values", contenido);
             // insertamos al indice
+            DBCollection rename = LAB2_SD_MONGO.db.createCollection("shard"+hash(entry.getKey(), LAB2_SD_MONGO.particiones), null);
+            //DBCollection rename = LAB2_SD_MONGO.shard.rename("shard"+Integer.toString(9), true);
             LAB2_SD_MONGO.index_db.insert(document);
+            rename.insert(document);
+            
         }
         
 //        System.out.println("Index size: " + LAB2_SD_MONGO.index_db.count() + 
 //                          " Db size: " + LAB2_SD_MONGO.coleccion.count() );
 //        
     }
-
-    
-//    public void buscar(InvertedIndex idx, String query){
-//        search(Arrays.asList(query.split(",")));
-//    }
 
     static class Tuple3 {
         String titulo;
@@ -361,4 +444,17 @@ public class InvertedIndex {
         }
     }
     
+    private static int hash(String id, int size) {
+        System.out.println("n particiones asd:" + size);
+        int hash = 13;
+        for (int i = 0; i < id.length(); i++) {
+            hash = hash*31 + id.charAt(i);
+        }
+        // Nos aseguramos de que sea positivo
+        hash = (int) Math.sqrt(hash*hash);
+        // Determinamos la particion a ocupar
+        hash = hash%size;
+        
+        return hash;
+    }
 }
