@@ -99,21 +99,21 @@ public class MultiThreadServer implements Runnable {
                         sentence = "POST /consulta/" + id;
                         
 //                        con esto enviamos al cache
-//                        try ( 
-//                            //Socket para el cliente (host, puerto)
-//                            Socket clientSocket = new Socket("localhost", 1234)) {
-//                            //Buffer para enviar el dato al server
-//                            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-//                            //Buffer para recibir dato del servidor
-//                            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//                            //Leemos del cliente y lo mandamos al servidor
-//                            outToServer.writeBytes(sentence + '\n');
-//                            //Recibimos del servidor
-//                            fromServer = inFromServer.readLine();
-//                            System.out.println("Cache response: " + fromServer);
-//                            //Cerramos el socket
-//                            clientSocket.close();
-//                        }
+                        try ( 
+                            //Socket para el cliente (host, puerto)
+                            Socket clientSocket = new Socket("localhost", IndexStart.puerto_cache)) {
+                            //Buffer para enviar el dato al server
+                            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+                            //Buffer para recibir dato del servidor
+                            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                            //Leemos del cliente y lo mandamos al servidor
+                            outToServer.writeBytes(sentence + '\n');
+                            //Recibimos del servidor
+                            fromServer = inFromServer.readLine();
+                            System.out.println("Cache response: " + fromServer);
+                            //Cerramos el socket
+                            clientSocket.close();
+                        }
                         
                         // Enviamos hit al cliente
                         System.out.println("enviamos a front");

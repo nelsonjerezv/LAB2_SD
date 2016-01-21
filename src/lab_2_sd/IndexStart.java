@@ -29,6 +29,7 @@ public class IndexStart {
     public static String nombre_coleccion_DB = null;
     public static String nombre_coleccion_DB_Index = null;
     public static int puerto_mongoDB;
+    public static int puerto_cache;
     public static int nParticiones;
     
     /**
@@ -76,6 +77,10 @@ public class IndexStart {
                     case 5:
                         puerto_mongoDB = Integer.parseInt(parametro);
                         System.out.println("parametro " + counter + ": " + puerto_mongoDB);
+                        break;
+                    case 6:
+                        puerto_cache = Integer.parseInt(parametro);
+                        System.out.println("parametro " + counter + ": " + puerto_cache);
                         break;
                     default:
                         System.out.println("parametro " + counter + ": " + parametro + "no es usado");
