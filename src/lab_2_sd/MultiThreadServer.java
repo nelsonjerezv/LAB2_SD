@@ -106,7 +106,7 @@ public class MultiThreadServer implements Runnable {
                             //Buffer para recibir dato del cache
                             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                             //Leemos del front y lo mandamos al cache
-                            String respuesta = sentence + "{";
+                            String respuesta = "{";
                             
                             for (int i = 0; i < respuestas.size(); i++) {
                                 respuesta = respuesta + "[" + respuestas.get(i)[0] + "*" + respuestas.get(i)[1] + "]";
@@ -117,7 +117,7 @@ public class MultiThreadServer implements Runnable {
                             respuesta = respuesta + "}";    
                             
                             
-                            outToServer.writeBytes(respuesta + '\n');
+                            outToServer.writeBytes(sentence + "/" + respuesta + '\n');
                             //Recibimos del servidor
                             fromServer = inFromServer.readLine();
                             System.out.println("Cache response: " + fromServer);
