@@ -104,7 +104,7 @@ public class InvertedIndex {
         System.out.println("indexed " + titulo + " " + pos + " words");
     }
 
-    public static ArrayList<String> search(ArrayList<String> words, DBCollection index_db, DBCollection coleccion){
+    public static ArrayList<String[]> search(ArrayList<String> words, DBCollection index_db, DBCollection coleccion){
 //        List<Tuple3> answer = new LinkedList<>();
         List<Tuple3> respuesta = new LinkedList<>();
         
@@ -197,82 +197,11 @@ public class InvertedIndex {
             }
         }
         
-//        inQuery.put("key", new BasicDBObject("$in", list));
-//        System.out.println("XXXXXX " + inQuery);
-//        DBCursor cursor = index_db.find(inQuery);
-//
-//        while(cursor.hasNext()) {
-//            DBObject obj = cursor.next();
-//            String asd = obj.get("values").toString();
-//            
-//            String findStr = "docID";
-//            int lastIndex = 0, count = 0;
-//
-//            while(lastIndex != -1){
-//                lastIndex = asd.indexOf(findStr,lastIndex);
-//                if(lastIndex != -1){
-//                    count ++;
-//                    lastIndex += findStr.length();
-//                }
-//            }
-//            
-//            System.out.println("count: " + count);
-//            
-//            List<List<Object>> response = new ArrayList<>();
-//            
-//            String xtr = asd.replaceAll("[a-zA-Z\\[\\]\\{\\}\":, ]", " ");
-//            xtr = xtr.replaceAll("\\s+", " ");
-//            String[] items = xtr.split(" ");
-//            
-//            int[] results = new int[items.length];
-//            for (int i = 0; i < items.length; i++) {
-//                try {
-//                    results[i] = Integer.parseInt(items[i]);
-//                } catch (NumberFormatException nfe) {
-//                
-//                }
-//            }            
-//            for (int i = 0; i < count; i++) {
-//                response.add(new ArrayList<>());
-//                for (int j = 0; j < 2; j++) {
-//                    response.get(i).add(results[i*2+j+1]);
-//                }
-//            }
-//            
-//            for (int i = 0; i < count; i++) {                   
-//                DBCursor cur = coleccion.find();
-//                cur.skip((int) response.get(i).get(0));
-//                cur.next();
-//                DBObject doc= cur.curr();
-//                
-//                boolean presente = false;
-//                for (int j = 0; j < respuesta.size(); j++) {                    
-//                    // si la estoy mostrando
-//                    if(respuesta.get(j).titulo.equals(doc.get("titulo"))){
-//                        // sumo la cantidad de ocurrencias(por cada palabra de la query)
-//                        // a.k.a. query = "hoy mismo"
-//                        // -> hoy   -> doc3, 4 ocurrencias
-//                        // -> mismo -> doc3, 2 ocurrencias
-//                        // answer -> doc3, (4+2) ocurrencias
-//                        // asi rankeo las respuestas
-//                        respuesta.get(j).count = respuesta.get(j).count + (int) response.get(i).get(1);
-//                        presente = true;
-//                    }
-//                }
-//                // si no la estoy mostrando en mi respuesta
-//                if(presente == false){
-//                    // la agrego
-//                    respuesta.add(new Tuple3(doc.get("titulo").toString(), (int) response.get(i).get(0), (int) response.get(i).get(1) ));  
-//                    presente = true;
-//                }
-//            }
-//        }
-        
         // ordenamos de mayor a menor cantidad de ocurrencias las respuestas
         Collections.sort(respuesta, new Tuple3Comparator() );
         Collections.reverse(respuesta);
         
-        ArrayList<String> toIndex = new ArrayList();
+        ArrayList<String[]> toIndex = new ArrayList();
 
         System.out.print("Busqueda: " + words + "\nResultados: ");
         respuesta.stream().map((f) -> {
@@ -280,7 +209,10 @@ public class InvertedIndex {
             cur.skip(f.fileno);
             cur.next();
             DBObject doc= cur.curr();
-            toIndex.add(f.titulo);
+            String[] headAndBody = new String[2];
+            headAndBody[0] = f.titulo; 
+            headAndBody[1] = doc.get("cuerpo").toString();
+            toIndex.add(headAndBody);
             return f;            
         }).forEach((f) -> {
             System.out.print("\n   " + f.titulo + ", ocurrencias: " + f.count);
@@ -288,58 +220,6 @@ public class InvertedIndex {
         System.out.println("");        
         
         return toIndex;
-        
-        //<editor-fold defaultstate="collapsed" desc="comment">
-//        for (int i=0; i<words.size(); i++) {
-//            String word = words.get(i).toLowerCase();
-//            // para cada palabra cargo sus values(doc, ocurrencias)
-//            List<Tuple3> idx = index.get(word);
-//            // si existen values
-//            if (idx != null) {
-//                // para cada tupla que existe
-//                for (Tuple3 t : idx) {
-//                    Tuple3 e = new Tuple3(files.get(t.fileno),(int)t.fileno ,(int)t.count);
-//                    boolean presente = false;
-//                    for(int j=0; j<answer.size(); j++){
-//                        // si la estoy mostrando
-//                        if ( answer.get(j).titulo.equals(e.titulo) ) {
-//                            // sumo la cantidad de ocurrencias(por cada palabra de la query)
-//                            // a.k.a. query = "hoy mismo"
-//                            // -> hoy   -> doc3, 4 ocurrencias
-//                            // -> mismo -> doc3, 2 ocurrencias
-//                            // answer -> doc3, (4+2) ocurrencias
-//                            // asi rankeo las respuestas
-//                            answer.get(j).count = answer.get(j).count + e.count;
-//                            presente = true;
-//                        }
-//                    }
-//                    // si no la estoy mostrando en mi respuesta
-//                    if(presente == false){
-//                        // la agrego
-//                        answer.add(e);
-//                        presente = true;
-//                    }
-//                }
-//            }
-//        }
-//</editor-fold>
-
-//        // ordenamos de mayor a menor cantidad de ocurrencias las respuestas
-//        Collections.sort(answer, new Tuple3Comparator() );
-//        Collections.reverse(answer);
-//
-//        System.out.print("Busqueda: " + words + "\nResultados: ");
-//        for (Tuple3 f : answer) {
-//            
-//            DBCursor cur = coleccion.find();
-//            cur.skip(f.fileno);
-//            cur.next();
-//            DBObject doc= cur.curr();
-//            
-//            System.out.print("\n   " + f.titulo + ", ocurrencias: " + f.count);
-//        }
-//        System.out.println("");
-
     }
 
     public static void indexar() throws IOException {

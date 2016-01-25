@@ -76,7 +76,7 @@ public class MultiThreadServer implements Runnable {
                     System.out.println("Buscando en el index de '" + resource + "' el registro con id " + id);                  
                     
                     // buscar en el index la respuesta la query
-//                    String result = particiones.get(particiones.size()).getEntryFromIndex(id);
+                    // String result = particiones.get(particiones.size()).getEntryFromIndex(id);
                     String id_splitted[] = id.split(" ");
                     System.out.println("id mide: " + id.length());
                     ArrayList<String> input = new ArrayList();
@@ -85,43 +85,52 @@ public class MultiThreadServer implements Runnable {
                         input.add(id_splitted[i]);
                     }
                     
-                    //System.out.println(Arrays.asList(id.split(" ")));
-                    //ArrayList<String> respuestas = (ArrayList<String>) InvertedIndex.search(input);
-                    ArrayList<String> respuestas = InvertedIndex.search(input, IndexStart.index_db, IndexStart.coleccion);
+                    ArrayList<String[]> ayer = new ArrayList();
+                    
+                    ArrayList<String[]> respuestas = InvertedIndex.search(input, IndexStart.index_db, IndexStart.coleccion);
                     String sentence, fromServer;
                     
                     // HIT
-//                    if(result != null){
                     if(!respuestas.isEmpty()){
                         System.out.println("Entrada en el Index encontrada, particion: "+ (particiones.size()) );
                         System.out.println("HIT");
                         
                         sentence = "POST /consulta/" + id;
                         
-//                        con esto enviamos al cache
-                        try ( 
-                            //Socket para el cliente (host, puerto)
-                            Socket clientSocket = new Socket("localhost", IndexStart.puerto_cache)) {
-                            //Buffer para enviar el dato al server
+                        // Enviamos al cache
+                        
+                            //Socket para el cache (host, puerto)
+                            Socket clientSocket = new Socket("localhost", IndexStart.puerto_cache) ;
+                            //Buffer para enviar el dato al cache
                             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-                            //Buffer para recibir dato del servidor
+                            //Buffer para recibir dato del cache
                             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                            //Leemos del cliente y lo mandamos al servidor
-                            outToServer.writeBytes(sentence + '\n');
+                            //Leemos del front y lo mandamos al cache
+                            String respuesta = sentence + "{";
+                            
+                            for (int i = 0; i < respuestas.size(); i++) {
+                                respuesta = respuesta + "[" + respuestas.get(i)[0] + "*" + respuestas.get(i)[1] + "]";
+                                if (i != respuestas.size()-1) {
+                                    respuesta = respuesta + " , ";    
+                                }                                
+                            }
+                            respuesta = respuesta + "}";    
+                            
+                            
+                            outToServer.writeBytes(respuesta + '\n');
                             //Recibimos del servidor
                             fromServer = inFromServer.readLine();
                             System.out.println("Cache response: " + fromServer);
                             //Cerramos el socket
                             clientSocket.close();
-                        }
                         
-                        // Enviamos hit al cliente
+                        
+                        // Enviamos al front
                         System.out.println("enviamos a front");
-                        String ans = respuestas.toString();
-                        outToClient.writeBytes(ans+"\n");
+                        outToClient.writeBytes(respuesta + '\n');
                     // MISS
                     }else{
-                        //Enviamos miss al cliente
+                        //Enviamos miss al front
                         outToClient.writeBytes("MISS\n");
                     }                    
                     break;
@@ -132,7 +141,5 @@ public class MultiThreadServer implements Runnable {
         } catch (IOException ex) {
             Logger.getLogger(MultiThreadServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-     
+    }     
 }

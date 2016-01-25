@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
  */
 public class testIndex {
     
-    public static ArrayList<String> testIndex(String in) throws FileNotFoundException, IOException, SAXException{ 
+    public static ArrayList<String[]> testIndex(String in) throws FileNotFoundException, IOException, SAXException{ 
         //while(true){
             
 //            Scanner scanner = new Scanner(System.in);
@@ -37,7 +37,7 @@ public class testIndex {
             }
 
             System.out.println(Arrays.asList(in.split(" ")));
-            ArrayList<String> respuestas = InvertedIndex.search(input, LAB2_SD_MONGO.index_db, LAB2_SD_MONGO.coleccion);
+            ArrayList<String[]> respuestas = InvertedIndex.search(input, LAB2_SD_MONGO.index_db, LAB2_SD_MONGO.coleccion);
             
             System.out.println("respuestas " + respuestas);
         //}
